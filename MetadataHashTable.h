@@ -1,70 +1,41 @@
-#include "MetadataHashTable.h"
+#pragma once
 
-MetadataHashTable::MetadataHashTable(){
-    for (int i = 0; i < TABLE_SIZE; i++){
-        buckets[i] = nullptr;
+#include <iostream>
+#include <string>
+
+using namespace std;
+
+struct HashNode
+{
+    string sampleID;
+    string patientData;
+    HashNode* next;
+
+    HashNode(string id, string data)
+    {
+        sampleID = id;
+        patientData = data;
+        next = nullptr;
     }
-}
+};
 
-int MetadataHashTable::hashFunction(const string& sampleID) const{
-    unsigned long hashValue = 0;
+class MetadataHashTable
+{
+private:
 
-    for (int i = 0; i < sampleID.length(); i++){
-        hashValue = (hashValue * 31 + sampleID[i]) % TABLE_SIZE;
-    }
+    static const int TABLE_SIZE = 101;
 
-    return hashValue;
-}
+    HashNode* buckets[TABLE_SIZE];
 
-void MetadataHashTable::insertMetadata(const string& sampleID, const string& patientData){
-    if (sampleID.empty()){
-        cout << "Error: Sample ID cannot be empty." << endl;
-        return;
-    }
-    int index = hashFunction(sampleID);
-    HashNode* curr = buckets[index];
+    int hashFunction(const string& sampleID) const;
 
-    while (curr != nullptr){
-        if (curr->sampleID == sampleID){
-            curr->patientData = patientData;
-            return;
-        }
+public:
 
-        curr = curr->next;
-    }
+    MetadataHashTable();
 
-    HashNode* newNode = new HashNode(sampleID, patientData);
-    newNode->next = buckets[index];
-    buckets[index] = newNode;
-}
+    ~MetadataHashTable();
 
-string MetadataHashTable::searchMetadata(const string& sampleID) const{
-    if (sampleID.empty()){
-        return "";
-    }
+    void insertMetadata(const string& sampleID, const string& patientData);
 
-    int index = hashFunction(sampleID);
-    HashNode* curr = buckets[index];
-
-    while (curr != nullptr){
-        if (curr->sampleID == sampleID){
-            return curr->patientData;
-        }
-
-        curr = curr->next;
-    }
-
-    return "";
-}
-
-MetadataHashTable::~MetadataHashTable(){
-    for (int i = 0; i < TABLE_SIZE; i++){
-        HashNode* curr = buckets[i];
-        while (curr != nullptr){
-            HashNode* temp = curr;
-            curr = curr->next;
-            delete temp;
-        }
-        buckets[i] = nullptr;
-    }
-}
+    string searchMetadata(const string& sampleID) const;
+};
